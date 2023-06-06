@@ -114,3 +114,29 @@ default.replication.factor=2
 EOF
 
 }
+
+resource "aws_kms_key" "this" {
+  description = "KMS key for Amazon MSK cluster ${var.name}"
+}
+
+resource "aws_msk_scram_secret_association" "this" {
+  cluster_arn     = aws_msk_cluster.external_msk.arn
+  secret_arn_list = aws_secretsmanager_secret.this[*].arn
+}
+
+resource "aws_secretsmanager_secret" "this" {
+  count = length(var.scram_users)
+
+  name_prefix = "AmazonMSK_${var.name}_${var.scram_users[count.index].username}"
+  kms_key_id  = aws_kms_key.this.key_id
+}
+
+resource "aws_secretsmanager_secret_version" "msk_scram" {
+  count = length(var.scram_users)
+
+  secret_id = aws_secretsmanager_secret.this[count.index].id
+  secret_string = jsonencode({
+    "username" = var.scram_users[count.index].username
+    "password" = var.scram_users[count.index].password
+  })
+}

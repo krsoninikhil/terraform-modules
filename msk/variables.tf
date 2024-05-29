@@ -1,7 +1,13 @@
 variable "name" {}
-variable "vpc_id" {}
-variable "no_of_nodes" {}
-variable "instance_type" {}
+variable "vpc_id" {
+    description = "ID of VPC where you want to deploy the kafka cluster"
+}
+variable "no_of_nodes" {
+    description = "no of nodes required in the kafka cluster"
+}
+variable "instance_type" {
+    description = "node instance type for kafka brokers"
+}
 variable "make_public" {
   description = "must be false if running first time, can only be updated to true"
 }
